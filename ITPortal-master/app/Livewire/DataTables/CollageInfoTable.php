@@ -1,0 +1,73 @@
+<?php
+
+namespace App\Livewire\DataTables;
+
+use App\Models\CollageInformations;
+use Rappasoft\LaravelLivewireTables\Views\Column;
+use App\Traits\RequestStatusStyle;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Log;
+use Masmerise\Toaster\Toaster;
+
+class CollageInfoTable extends CustomeDataTableComponent
+{
+    use RequestStatusStyle;
+
+    protected $model = CollageInformations::class;
+
+
+
+
+    public function mount() {}
+
+    public function configure(): void
+    {
+        $this->setPrimaryKey('id');;
+        $this->setAddButton(Route('admin.collage.create'));
+    }
+
+    public function builder(): Builder
+
+    {
+
+
+        return $this->model::query();
+    }
+    public function columns(): array
+    {
+
+
+        return [
+
+            Column::make('id', 'id')
+                ->sortable()->hideIf(true),
+            Column::make(trans('string.Name'), "name")
+                ->sortable(),
+            Column::make(trans('string.Value'), "value")
+                ->sortable(),
+
+
+        ];
+    }
+
+    public function delete($id = 0): void
+    {
+
+        try {
+            $info =  $this->model::where('id', '=', $id)->first();
+            if ($info) {
+                if ($info->delete()) {
+                    Toaster::success(trans("messages.Deleted Item"));
+                }
+            } else {
+                Toaster::error(trans('messages.Faild delete item'));
+            }
+        } catch (\Throwable $th) {
+            Log::error(__CLASS__ . '@' .  __FUNCTION__ . " : " . $th->getMessage());
+        }
+    }
+    public function edit($id): void
+    {
+        redirect()->route('admin.collage.edit', ["id" => $id]);
+    }
+}
